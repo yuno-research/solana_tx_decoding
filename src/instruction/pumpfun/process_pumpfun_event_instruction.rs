@@ -13,7 +13,8 @@ use solana_sdk::signature::Signature;
 use std::collections::HashSet;
 
 /**
-PF bonding curve events contain all you need to build the SwapTx type
+PF bonding curve events contain all you need to build the SwapTx type. This function assumed that
+the instruction has already been validated as a valid pumpfun event instruction.
 */
 pub fn process_pumpfun_event_instruction(
   instruction: &Instruction,
@@ -23,25 +24,7 @@ pub fn process_pumpfun_event_instruction(
   block_time: u64,
   signature: &Signature,
   signers: &HashSet<Pubkey>,
-) -> Option<SwapTx> {
-  // check data discriminator
-  for i in 0..PUMP_CONSTANTS.bonding_curve_event_discriminator.len() {
-    if instruction.data[i] != PUMP_CONSTANTS.bonding_curve_event_discriminator[i] {
-      return None;
-    }
-  }
-  // check program id matches
-  if instruction.program_id != PUMP_CONSTANTS.bonding_curve_program {
-    return None;
-  }
-  // The only account that should be interacted with here is the event authority
-  if instruction.accounts.len() < 1
-    || instruction.accounts[0] != PUMP_CONSTANTS.bonding_curve_event_authority
-  {
-    return None;
-  }
-  // All checks for bonding curve event passed
-
+) -> SwapTx {
   let token_address;
   let is_buy;
   let fee_fraction_lp;
@@ -111,7 +94,7 @@ pub fn process_pumpfun_event_instruction(
     swapped_amount_received = sol_amount - total_fee;
   }
 
-  Some(SwapTx {
+  SwapTx {
     pool: Pools::PfBondingCurve,
     direction,
     block_time,
@@ -137,5 +120,5 @@ pub fn process_pumpfun_event_instruction(
     market_address,
     signature: signature.clone(),
     signers: signers.clone(),
-  })
+  }
 }
