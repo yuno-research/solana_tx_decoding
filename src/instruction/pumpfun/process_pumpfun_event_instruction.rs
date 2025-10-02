@@ -110,10 +110,10 @@ pub fn process_pumpfun_event_instruction(
     // Quantity of token in vault AFTER swap is completed
     pool_token_a_vault_amount,
     pool_token_b_vault_amount,
-    price_a_b_lp: (virtual_token_reserves as u128 * LAMPORTS_PER_SOL / virtual_sol_reserves as u128)
-      as u64,
-    price_b_a_lp: (virtual_sol_reserves as u128 * LAMPORTS_PER_SOL / virtual_token_reserves as u128)
-      as u64,
+    price_a_b_lp: (virtual_token_reserves as u128 * LAMPORTS_PER_SOL
+      / virtual_sol_reserves as u128),
+    price_b_a_lp: (virtual_sol_reserves as u128 * LAMPORTS_PER_SOL
+      / virtual_token_reserves as u128),
 
     token_a_address: token_address,
     token_b_address: TOKENS.wsol,
