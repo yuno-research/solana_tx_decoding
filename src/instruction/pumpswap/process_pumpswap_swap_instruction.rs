@@ -16,12 +16,12 @@ pub fn process_pumpswap_swap_instruction(
   instruction: &Instruction,
   swap_event_instruction: &Instruction,
   direction: SwapDirection,
-  index: u64,
-  slot: u64,
-  signers: &HashSet<Pubkey>,
   block_time: u64,
-  signature: &Signature,
+  slot: u64,
+  index: u64,
   atomic_instruction_index: u64,
+  signers: &HashSet<Pubkey>,
+  signature: &Signature,
 ) -> SwapTx {
   let token_a_address = instruction.accounts[3];
   let token_b_address = instruction.accounts[4];

@@ -18,12 +18,12 @@ the instruction has already been validated as a valid pumpfun event instruction.
 */
 pub fn process_pumpfun_event_instruction(
   instruction: &Instruction,
-  atomic_instruction_index: u64,
-  index: u64,
-  slot: u64,
   block_time: u64,
-  signature: &Signature,
+  slot: u64,
+  index: u64,
+  atomic_instruction_index: u64,
   signers: &HashSet<Pubkey>,
+  signature: &Signature,
 ) -> SwapTx {
   let token_address;
   let is_buy;
