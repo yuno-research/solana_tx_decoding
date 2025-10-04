@@ -1,0 +1,32 @@
+# rustfmt.toml — approximating your Prettier config
+
+# -- Line width ------------------------------------------------------------
+max_width = 100                # prettier.printWidth = 100
+
+# -- Tabs vs. spaces -------------------------------------------------------
+hard_tabs = false             # prettier.useTabs = false
+tab_spaces = 2                 # prettier.tabWidth = 2
+
+# -- Trailing commas -------------------------------------------------------
+# Options: "Never", "Always", "Vertical"
+trailing_comma = "Never"       # prettier.trailingComma = "none"
+
+# -- Braces spacing --------------------------------------------------------
+spaces_inside_braces = false   # prettier.bracketSpacing = false
+
+# -- Newline style ---------------------------------------------------------
+# Options: "Auto", "Unix", "Windows"
+newline_style = "Auto"         # prettier.endOfLine = "auto"
+
+# -- Semicolons ------------------------------------------------------------
+# Rust syntax always requires semicolons; no config needed.
+# prettier.semi = true
+
+# -- Strings ---------------------------------------------------------------
+# Rust strings always use double quotes; no config needed.
+# prettier.singleQuote = false
+
+# -- Other Prettier options with no Rustfmt equivalent --------------------
+# prettier.bracketSameLine = false   # JSX-isms, not applicable
+# prettier.arrowParens = "always"    # JS arrow funcs, not applicable
+# prettier.quoteProps = "preserve"   # JS object props, not applicable
