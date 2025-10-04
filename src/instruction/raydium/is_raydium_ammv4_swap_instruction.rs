@@ -13,7 +13,7 @@ pub fn is_raydium_ammv4_swap_instruction(instruction: &Instruction) -> bool {
   if instruction.accounts.len() < 17 {
     return false;
   }
-  if instruction.program_id != RAYDIUM_CONSTANTS.amm_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize] != RAYDIUM_CONSTANTS.amm_program {
     return false;
   }
   // Discriminator has to match one of the ammv4 discriminators

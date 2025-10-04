@@ -1,5 +1,5 @@
-use solana_central::central_context::central_context::CentralContext;
 use solana_central::constants::LAMPORTS_PER_SOL;
+use solana_central::raydium::get_cpmm_fee_amount_from_config_account::get_cpmm_fee_amount_from_config_account;
 use solana_central::types::instruction::Instruction;
 use solana_central::types::pools::Pools;
 use solana_central::types::swap_direction::SwapDirection;
@@ -8,7 +8,6 @@ use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::sync::Arc;
 
 /**
 This function is called in a scenario where the signer of a tx is a relevant signer has produced a
@@ -20,19 +19,18 @@ pub fn process_raydium_cpmm_swap_instruction(
   // The swap instruction itself
   instruction: &Instruction,
   // The 2 token transfers (into one vault, out of the other vault) that come after the swap
-  transfers: &[Instruction; 2],
-  running_token_balances: &mut HashMap<Pubkey, u64>,
+  transfers: &[Instruction],
+  running_token_balances: &mut HashMap<u8, u64>,
   block_time: u64,
   slot: u64,
   index: u64,
-  atomic_instruction_index: u64,
+  atomic_instruction_index: u8,
   signers: &HashSet<Pubkey>,
   signature: &Signature,
-  central_context: &Arc<CentralContext>,
 ) -> SwapTx {
-  let market_address = instruction.accounts[3];
-  let input_token_mint = instruction.accounts[10];
-  let output_token_mint = instruction.accounts[11];
+  let market_address = instruction.tx_account_keys[instruction.accounts[3] as usize];
+  let input_token_mint = instruction.tx_account_keys[instruction.accounts[10] as usize];
+  let output_token_mint = instruction.tx_account_keys[instruction.accounts[11] as usize];
   let input_token_vault = instruction.accounts[6];
   let output_token_vault = instruction.accounts[7];
 
@@ -74,18 +72,9 @@ pub fn process_raydium_cpmm_swap_instruction(
 
   // The fee config is the third account
 
-  let fee_fraction_lp;
-  if let Some(a) = central_context
-    .raydium_cpmm_fee_rates_lp
-    .get(&instruction.accounts[2])
-  {
-    fee_fraction_lp = *a;
-  } else {
-    panic!(
-      "process_raydium_cpmm_swap_instruction: Found a swap config not defined in constants, signature: {}",
-      signature
-    );
-  }
+  let fee_fraction_lp = get_cpmm_fee_amount_from_config_account(
+    instruction.tx_account_keys[instruction.accounts[2] as usize],
+  );
 
   let pool_token_a_vault_amount = running_token_balances[&token_a_vault_address];
   let pool_token_b_vault_amount = running_token_balances[&token_b_vault_address];

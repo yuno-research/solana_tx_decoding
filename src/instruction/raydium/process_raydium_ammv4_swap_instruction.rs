@@ -5,7 +5,6 @@ use solana_central::types::swap_direction::SwapDirection;
 use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
-use solana_transaction_status_client_types::UiTransactionTokenBalance;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
@@ -17,22 +16,21 @@ pub fn process_raydium_ammv4_swap_instruction(
   instruction: &Instruction,
   // The 2 token transfers (into one vault, out of the other vault) that come after the swap
   // TODO this might have to be changed depending on whether rpc data returns parsed for this
-  transfers: &[Instruction; 2],
-  pre_token_balances: &Vec<UiTransactionTokenBalance>,
-  running_token_balances: &mut HashMap<Pubkey, u64>,
-  account_keys: &Vec<Pubkey>,
+  transfers: &[Instruction],
+  ta_mint: &HashMap<u8, Pubkey>,
+  running_token_balances: &mut HashMap<u8, u64>,
   block_time: u64,
   slot: u64,
   index: u64,
-  atomic_instruction_index: u64,
+  atomic_instruction_index: u8,
   signers: &HashSet<Pubkey>,
   signature: &Signature,
 ) -> SwapTx {
-  let market_address = instruction.accounts[1];
+  let market_address = instruction.tx_account_keys[instruction.accounts[1] as usize];
 
   // account indices change based on length of accounts array
-  let token_a_vault_address: Pubkey;
-  let token_b_vault_address: Pubkey;
+  let token_a_vault_address;
+  let token_b_vault_address;
   if instruction.accounts.len() == 17 {
     token_a_vault_address = instruction.accounts[4];
     token_b_vault_address = instruction.accounts[5];
@@ -46,31 +44,8 @@ pub fn process_raydium_ammv4_swap_instruction(
     );
   }
   // Identify token addresses involved in tx, not included in swap instruction
-  let mut token_a_address = None;
-  let mut token_b_address = None;
-  for token_balance in pre_token_balances {
-    let account_pubkey = account_keys[token_balance.account_index as usize];
-    if account_pubkey == token_a_vault_address {
-      token_a_address = Some(Pubkey::from_str_const(&token_balance.mint));
-    } else if account_pubkey == token_b_vault_address {
-      token_b_address = Some(Pubkey::from_str_const(&token_balance.mint));
-    }
-    if token_a_address.is_some() && token_b_address.is_some() {
-      break;
-    }
-  }
-  let token_a_address = token_a_address.unwrap_or_else(|| {
-    panic!(
-      "process_raydium_ammv4_swap_instruction: Token a vault address not found in pre token balances, signature: {}",
-      signature
-    )
-  });
-  let token_b_address = token_b_address.unwrap_or_else(|| {
-    panic!(
-      "process_raydium_ammv4_swap_instruction: Token b vault address not found in pre token balances, signature: {}",
-      signature
-    )
-  });
+  let token_a_address = *ta_mint.get(&token_a_vault_address).expect(format!("process_raydium_ammv4_swap_instruction: Token a vault address not found in ta_mint, signature: {}", signature).as_str());
+  let token_b_address = *ta_mint.get(&token_b_vault_address).expect(format!("process_raydium_ammv4_swap_instruction: Token b vault address not found in ta_mint, signature: {}", signature).as_str());
 
   /*
   Amount in is how much you sent to the pool in the first transfer instruction. Amount out is how

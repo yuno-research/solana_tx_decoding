@@ -21,7 +21,7 @@ pub fn process_pumpfun_event_instruction(
   block_time: u64,
   slot: u64,
   index: u64,
-  atomic_instruction_index: u64,
+  atomic_instruction_index: u8,
   signers: &HashSet<Pubkey>,
   signature: &Signature,
 ) -> SwapTx {
@@ -39,7 +39,7 @@ pub fn process_pumpfun_event_instruction(
   // The new event post creator fee update
   if instruction.data.len() == 266 {
     let decoded_layout =
-      PfTradeEventIdlCurrent::try_from_slice(instruction.data.as_slice()).unwrap();
+      PfTradeEventIdlCurrent::try_from_slice(instruction.data).unwrap();
     token_address = decoded_layout.mint;
     is_buy = decoded_layout.is_buy;
     sol_amount = decoded_layout.sol_amount;
@@ -54,7 +54,7 @@ pub fn process_pumpfun_event_instruction(
   }
   // The old creator fee event pre creator fee update
   else if instruction.data.len() == 137 {
-    let decoded_layout = PfTradeEventIdlOld::try_from_slice(instruction.data.as_slice()).unwrap();
+    let decoded_layout = PfTradeEventIdlOld::try_from_slice(instruction.data).unwrap();
     token_address = decoded_layout.mint;
     is_buy = decoded_layout.is_buy;
     sol_amount = decoded_layout.sol_amount;

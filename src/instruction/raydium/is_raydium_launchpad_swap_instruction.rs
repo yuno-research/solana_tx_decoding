@@ -13,7 +13,7 @@ pub fn is_raydium_launchpad_swap_instruction(instruction: &Instruction) -> (bool
   if instruction.accounts.len() < 14 {
     return (false, SwapDirection::AToB);
   }
-  if instruction.program_id != RAYDIUM_CONSTANTS.launchpad_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize] != RAYDIUM_CONSTANTS.launchpad_program {
     return (false, SwapDirection::AToB);
   }
   // Discriminator has to match one of the launchpad swap discriminators

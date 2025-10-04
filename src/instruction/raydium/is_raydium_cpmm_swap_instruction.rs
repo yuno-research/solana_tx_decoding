@@ -12,7 +12,7 @@ pub fn is_raydium_cpmm_swap_instruction(instruction: &Instruction) -> bool {
   if instruction.accounts.len() < 13 {
     return false;
   }
-  if instruction.program_id != RAYDIUM_CONSTANTS.cpmm_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize] != RAYDIUM_CONSTANTS.cpmm_program {
     return false;
   }
   // Discriminator has to match one of the cpmm swap discriminators

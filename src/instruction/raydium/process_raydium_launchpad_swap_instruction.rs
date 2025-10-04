@@ -23,13 +23,13 @@ pub fn process_raydium_launchpad_swap_instruction(
   block_time: u64,
   slot: u64,
   index: u64,
-  atomic_instruction_index: u64,
+  atomic_instruction_index: u8,
   signers: &HashSet<Pubkey>,
   signature: &Signature,
 ) -> SwapTx {
-  let token_a_address = instruction.accounts[9];
-  let token_b_address = instruction.accounts[10];
-  let market_address = instruction.accounts[4];
+  let token_a_address = instruction.tx_account_keys[instruction.accounts[9] as usize];
+  let token_b_address = instruction.tx_account_keys[instruction.accounts[10] as usize];
+  let market_address = instruction.tx_account_keys[instruction.accounts[4] as usize];
   let swap_event = LaunchpadTradeEventIdl::try_from_slice(&event.data).unwrap();
 
   let swapped_amount_in = swap_event.amount_in;

@@ -19,13 +19,13 @@ pub fn process_pumpswap_swap_instruction(
   block_time: u64,
   slot: u64,
   index: u64,
-  atomic_instruction_index: u64,
+  atomic_instruction_index: u8,
   signers: &HashSet<Pubkey>,
   signature: &Signature,
 ) -> SwapTx {
-  let token_a_address = instruction.accounts[3];
-  let token_b_address = instruction.accounts[4];
-  let market_address = instruction.accounts[0];
+  let token_a_address = instruction.tx_account_keys[instruction.accounts[3] as usize];
+  let token_b_address = instruction.tx_account_keys[instruction.accounts[4] as usize];
+  let market_address = instruction.tx_account_keys[instruction.accounts[0] as usize];
 
   let swapped_amount_in;
   let swapped_amount_received;

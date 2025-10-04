@@ -12,12 +12,12 @@ pub fn is_pumpfun_event_instruction(instruction: &Instruction) -> bool {
     }
   }
   // check program id matches
-  if instruction.program_id != PUMP_CONSTANTS.bonding_curve_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize] != PUMP_CONSTANTS.bonding_curve_program {
     return false;
   }
   // The only account that should be interacted with here is the event authority
   if instruction.accounts.len() < 1
-    || instruction.accounts[0] != PUMP_CONSTANTS.bonding_curve_event_authority
+    || instruction.tx_account_keys[instruction.accounts[0] as usize] != PUMP_CONSTANTS.bonding_curve_event_authority
   {
     return false;
   }
