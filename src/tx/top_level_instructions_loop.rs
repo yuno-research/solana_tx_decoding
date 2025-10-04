@@ -1,0 +1,108 @@
+use crate::instruction::classify_instruction::classify_instruction;
+use crate::instruction::pumpswap::process_pumpswap_swap_instruction::process_pumpswap_swap_instruction;
+use crate::instruction::raydium::process_raydium_ammv4_swap_instruction::process_raydium_ammv4_swap_instruction;
+use crate::instruction::raydium::process_raydium_cpmm_swap_instruction::process_raydium_cpmm_swap_instruction;
+use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::process_raydium_launchpad_swap_instruction;
+use crate::tx::inner_instructions_loop::inner_instructions_loop;
+use crate::types::instruction_type::InstructionType;
+use solana_central::types::instruction::Instruction;
+use solana_sdk::pubkey::Pubkey;
+use solana_sdk::signature::Signature;
+use std::collections::HashMap;
+use std::collections::HashSet;
+// use tonic::service::Interceptor;
+
+pub fn top_level_instructions_loop(
+  top_level_instructions: &Vec<Instruction>,
+  inner_instructions: &HashMap<u8, Vec<Instruction>>,
+  account_keys: &Vec<Pubkey>,
+  ta_mint: &HashMap<u8, Pubkey>,
+  running_token_balances: &mut HashMap<u8, u64>,
+  block_time: u64,
+  slot: u64,
+  index: u64,
+  signers: &HashSet<Pubkey>,
+  signature: &Signature,
+) {
+  let mut atomic_instruction_index = 0;
+  for (instr_index, instruction) in top_level_instructions.iter().enumerate() {
+    let instr_index = instr_index as u8;
+    let (instruction_type, swap_direction) = classify_instruction(&instruction);
+    if instruction_type == InstructionType::None {
+      if let Some(inner_instructions) = inner_instructions.get(&instr_index) {
+        inner_instructions_loop(
+          inner_instructions,
+          account_keys,
+          ta_mint,
+          running_token_balances,
+          block_time,
+          slot,
+          index,
+          &mut atomic_instruction_index,
+          signers,
+          signature,
+        );
+      }
+    } else if instruction_type == InstructionType::RaydiumLaunchpadSwap {
+      let event = &inner_instructions.get(&instr_index).unwrap()[0];
+      let swap_tx = process_raydium_launchpad_swap_instruction(
+        instruction,
+        event,
+        swap_direction,
+        block_time,
+        slot,
+        index,
+        atomic_instruction_index,
+        signers,
+        signature,
+      );
+    } else if instruction_type == InstructionType::RaydiumCpmmSwap {
+      let transfers = inner_instructions.get(&instr_index).unwrap();
+      let swap_tx = process_raydium_cpmm_swap_instruction(
+        instruction,
+        transfers,
+        running_token_balances,
+        block_time,
+        slot,
+        index,
+        atomic_instruction_index,
+        signers,
+        signature,
+      );
+    } else if instruction_type == InstructionType::RaydiumAmmV4Swap {
+      let transfers = inner_instructions.get(&instr_index).unwrap();
+      let swap_tx = process_raydium_ammv4_swap_instruction(
+        instruction,
+        transfers,
+        ta_mint,
+        running_token_balances,
+        block_time,
+        slot,
+        index,
+        atomic_instruction_index,
+        signers,
+        signature,
+      );
+    } else if instruction_type == InstructionType::PumpswapSwap {
+      let event = inner_instructions
+        .get(&instr_index)
+        .unwrap()
+        .last()
+        .unwrap();
+      let swap_tx = process_pumpswap_swap_instruction(
+        instruction,
+        event,
+        swap_direction,
+        block_time,
+        slot,
+        index,
+        atomic_instruction_index,
+        signers,
+        signature,
+      );
+    }
+    // Pf bonding curve is not in here. Its not possible for a pf swap event be in a top level instruction
+    //
+    atomic_instruction_index += 1;
+  }
+}
