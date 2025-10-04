@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum InstructionType {
   // Swaps
   RaydiumAmmV4Swap,
