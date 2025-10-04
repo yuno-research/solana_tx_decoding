@@ -9,6 +9,11 @@ pub fn is_pumpswap_swap_instruction(instruction: &Instruction) -> (bool, SwapDir
   if instruction.data.len() < 24 {
     return (false, SwapDirection::AToB);
   }
+  if instruction.tx_account_keys[instruction.program_id_index as usize]
+    != PUMP_CONSTANTS.pump_swap_program
+  {
+    return (false, SwapDirection::AToB);
+  }
   let discriminator = &instruction.data[0..8];
   // Discriminator has to be either buy or sell
   if discriminator == PUMP_CONSTANTS.buy_instruction_discriminator {
