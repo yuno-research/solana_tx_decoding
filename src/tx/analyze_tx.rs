@@ -1,10 +1,12 @@
 use crate::tx::top_level_instructions_loop::top_level_instructions_loop;
 use crate::types::tx_format::TxFormat;
 use solana_central::types::instruction::Instruction;
+use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use tokio::sync::broadcast::Sender;
 
 /**
 This is going to be the main function that analyzes raw solana transactions and extracts what we
@@ -13,7 +15,13 @@ adding/removing liquidity and etc.
 
 This function does not return anything, it writes to a broadcast channel
 */
-pub fn analyze_tx(tx: &TxFormat, block_time: u64, slot: u64, index: u64) {
+pub fn analyze_tx(
+  tx: &TxFormat,
+  swap_tx_sender: &Sender<SwapTx>,
+  block_time: u64,
+  slot: u64,
+  index: u64,
+) {
   let mut account_keys;
   let mut top_level_instructions: Vec<Instruction> = Vec::new();
   // Key is the top level instruction index, value is the list of inner instructions yielded by that top level instruction
@@ -218,6 +226,7 @@ pub fn analyze_tx(tx: &TxFormat, block_time: u64, slot: u64, index: u64) {
     &account_keys,
     &ta_mint,
     &mut running_token_balances,
+    swap_tx_sender,
     block_time,
     slot,
     index,

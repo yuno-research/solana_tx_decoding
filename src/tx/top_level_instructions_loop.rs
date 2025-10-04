@@ -6,11 +6,12 @@ use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::pro
 use crate::tx::inner_instructions_loop::inner_instructions_loop;
 use crate::types::instruction_type::InstructionType;
 use solana_central::types::instruction::Instruction;
+use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
-// use tonic::service::Interceptor;
+use tokio::sync::broadcast::Sender;
 
 pub fn top_level_instructions_loop(
   top_level_instructions: &Vec<Instruction>,
@@ -18,6 +19,7 @@ pub fn top_level_instructions_loop(
   account_keys: &Vec<Pubkey>,
   ta_mint: &HashMap<u8, Pubkey>,
   running_token_balances: &mut HashMap<u8, u64>,
+  swap_tx_sender: &Sender<SwapTx>,
   block_time: u64,
   slot: u64,
   index: u64,
@@ -35,6 +37,7 @@ pub fn top_level_instructions_loop(
           account_keys,
           ta_mint,
           running_token_balances,
+          swap_tx_sender,
           block_time,
           slot,
           index,
@@ -56,6 +59,7 @@ pub fn top_level_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::RaydiumCpmmSwap {
       let transfers = inner_instructions.get(&instr_index).unwrap();
       let swap_tx = process_raydium_cpmm_swap_instruction(
@@ -69,6 +73,7 @@ pub fn top_level_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::RaydiumAmmV4Swap {
       let transfers = inner_instructions.get(&instr_index).unwrap();
       let swap_tx = process_raydium_ammv4_swap_instruction(
@@ -83,6 +88,7 @@ pub fn top_level_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::PumpswapSwap {
       let event = inner_instructions
         .get(&instr_index)
@@ -100,6 +106,7 @@ pub fn top_level_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     }
     // Pf bonding curve is not in here. Its not possible for a pf swap event be in a top level instruction
     //

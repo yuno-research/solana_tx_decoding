@@ -6,17 +6,19 @@ use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::pro
 use crate::types::instruction_type::InstructionType;
 use solana_central::constants::PUMP_CONSTANTS;
 use solana_central::types::instruction::Instruction;
+use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
-// use tonic::service::Interceptor;
+use tokio::sync::broadcast::Sender;
 
 pub fn inner_instructions_loop(
   inner_instructions: &Vec<Instruction>,
   account_keys: &Vec<Pubkey>,
   ta_mint: &HashMap<u8, Pubkey>,
   running_token_balances: &mut HashMap<u8, u64>,
+  swap_tx_sender: &Sender<SwapTx>,
   block_time: u64,
   slot: u64,
   index: u64,
@@ -47,6 +49,7 @@ pub fn inner_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::RaydiumCpmmSwap {
       // The transfers are the two instructions immediately after the swap
       let transfers = &inner_instructions[instr_index + 1..instr_index + 3];
@@ -61,6 +64,7 @@ pub fn inner_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::RaydiumAmmV4Swap {
       // The transfers are the two instructions immediately after the swap
       let transfers = &inner_instructions[instr_index + 1..instr_index + 3];
@@ -76,6 +80,7 @@ pub fn inner_instructions_loop(
         signers,
         signature,
       );
+      let _ = swap_tx_sender.send(swap_tx);
     } else if instruction_type == InstructionType::PumpswapSwap {
       // To find this event, look from the instructions following the swap until we find one that is for the pumpswap program
       let mut event = None;
@@ -98,6 +103,7 @@ pub fn inner_instructions_loop(
           signers,
           signature,
         );
+      let _ = swap_tx_sender.send(swap_tx);
     }
     // Pf bonding curve is not in here. Its not possible for a pf swap event be in a top level instruction
     //
