@@ -3,6 +3,7 @@ use crate::instruction::pumpswap::process_pumpswap_swap_instruction::process_pum
 use crate::instruction::raydium::process_raydium_ammv4_swap_instruction::process_raydium_ammv4_swap_instruction;
 use crate::instruction::raydium::process_raydium_cpmm_swap_instruction::process_raydium_cpmm_swap_instruction;
 use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::process_raydium_launchpad_swap_instruction;
+use crate::instruction::pumpfun::process_pumpfun_event_instruction::process_pumpfun_event_instruction;
 use crate::types::instruction_type::InstructionType;
 use solana_central::constants::PUMP_CONSTANTS;
 use solana_central::types::instruction::Instruction;
@@ -32,10 +33,7 @@ pub fn inner_instructions_loop(
     let instruction = &inner_instructions[instr_index];
 
     let (instruction_type, swap_direction) = classify_instruction(&instruction);
-    if instruction_type == InstructionType::None {
-      instr_index += 1;
-      continue;
-    } else if instruction_type == InstructionType::RaydiumLaunchpadSwap {
+    if instruction_type == InstructionType::RaydiumLaunchpadSwap {
       // Event instruction is first instruction after the swap
       let event = &inner_instructions[instr_index + 1];
       let swap_tx = process_raydium_launchpad_swap_instruction(
@@ -105,8 +103,21 @@ pub fn inner_instructions_loop(
         );
       let _ = swap_tx_sender.send(swap_tx);
     }
-    // Pf bonding curve is not in here. Its not possible for a pf swap event be in a top level instruction
-    //
+    else if instruction_type == InstructionType::PfBondingCurveSwap {
+      let swap_tx = process_pumpfun_event_instruction(
+        instruction,
+        block_time,
+        slot,
+        index,
+        *atomic_instruction_index,
+        signers,
+        signature,
+      );
+      let _ = swap_tx_sender.send(swap_tx);
+    }
+
     *atomic_instruction_index += 1;
+    instr_index += 1;
+    // println!("Atomic instruction index (in inner): {:?}", *atomic_instruction_index);
   }
 }

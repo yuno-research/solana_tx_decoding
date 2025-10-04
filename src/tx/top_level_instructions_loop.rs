@@ -30,7 +30,11 @@ pub fn top_level_instructions_loop(
   for (instr_index, instruction) in top_level_instructions.iter().enumerate() {
     let instr_index = instr_index as u8;
     let (instruction_type, swap_direction) = classify_instruction(&instruction);
+    // println!("Instruction type: {:?}", instruction_type);
+    // println!("Atomic instruction index: {:?}", atomic_instruction_index); 
     if instruction_type == InstructionType::None {
+      // Bump by 1, if its not none it will be bumped by 1 again adn the length of the inners
+      atomic_instruction_index += 1;
       if let Some(inner_instructions) = inner_instructions.get(&instr_index) {
         inner_instructions_loop(
           inner_instructions,
@@ -108,8 +112,12 @@ pub fn top_level_instructions_loop(
       );
       let _ = swap_tx_sender.send(swap_tx);
     }
+    // Add to atomic instruction index if not None since the top level swaps don't iterate through
+    if instruction_type != InstructionType::None {
+      let a = inner_instructions.get(&instr_index).unwrap().len() as u8;
+      // println!("Inner instructions length: {:?}", a);
+      atomic_instruction_index += a + 1;
+    }
     // Pf bonding curve is not in here. Its not possible for a pf swap event be in a top level instruction
-    //
-    atomic_instruction_index += 1;
   }
 }
