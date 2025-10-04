@@ -39,6 +39,10 @@ pub fn analyze_tx(
   match tx {
     // Standardize data from rpc txs
     TxFormat::Archive(tx) => {
+      // Do not analyze failed txs
+      if tx.meta.err.is_some() {
+        return;
+      }
       let account_keys_length = tx.tx.message.static_account_keys().len()
         + tx.meta.loaded_writable_addresses.len()
         + tx.meta.loaded_readonly_addresses.len();
@@ -123,6 +127,10 @@ pub fn analyze_tx(
 
     // Standardize data from grpc txs
     TxFormat::Grpc(tx) => {
+      // Do not analyze failed txs
+      if tx.meta.err.is_some() {
+        return;
+      }
       let message = tx.tx.message.as_ref().unwrap();
       let account_keys_length = message.account_keys.len()
         + tx.meta.loaded_writable_addresses.len()
@@ -218,6 +226,11 @@ pub fn analyze_tx(
     }
     
     TxFormat::JsonRpc(tx) => {
+      // Do not analyze failed txs
+      if tx.meta.err.is_some() {
+        // println!("Failed tx: {:?}", tx.meta.err.as_ref().unwrap());
+        return;
+      }
       arena = Bump::new();
 
       let loaded_addresses = tx.meta.loaded_addresses.as_ref().unwrap();
