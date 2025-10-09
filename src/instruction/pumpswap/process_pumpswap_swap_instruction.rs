@@ -50,8 +50,12 @@ pub fn process_pumpswap_swap_instruction(
     let total_fee =
       decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
     // amount out is only what user receives out
-    fee_fraction_lp =
-      (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_received + total_fee) as u128) as u64;
+    // Divison by zero check for zero swapped amounts
+    fee_fraction_lp = if swapped_amount_received + total_fee == 0 {
+      0
+    } else {
+      (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_received + total_fee) as u128) as u64
+    };
   } else {
     let decoded_event = PumpswapBuyEventIdl::try_from_slice(&swap_event_instruction.data).unwrap();
     // This value included creator fee and lp fee and protocol fee and amount swapped in
@@ -64,7 +68,13 @@ pub fn process_pumpswap_swap_instruction(
     let total_fee =
       decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
     // amount in is total user transfers in, don't include fee in denominator
-    fee_fraction_lp = (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_in) as u128) as u64;
+
+    // Division by zero check for zero swapped amounts
+    fee_fraction_lp = if swapped_amount_in == 0 {
+      0
+    } else {
+        (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_in) as u128) as u64
+    };
   }
 
   let price_a_b_lp =
