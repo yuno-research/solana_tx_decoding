@@ -1,4 +1,6 @@
-use crate::protocol_idls::pumpswap::{PumpswapBuyEventIdl, PumpswapSellEventIdl};
+use crate::protocol_idls::pumpswap::{
+  PumpswapBuyEventIdlCurrent, PumpswapBuyEventIdlOld, PumpswapSellEventIdl,
+};
 use borsh::BorshDeserialize;
 use solana_central::constants::LAMPORTS_PER_SOL;
 use solana_central::types::instruction::Instruction;
@@ -56,25 +58,50 @@ pub fn process_pumpswap_swap_instruction(
     } else {
       (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_received + total_fee) as u128) as u64
     };
-  } else {
-    let decoded_event = PumpswapBuyEventIdl::try_from_slice(&swap_event_instruction.data).unwrap();
-    // This value included creator fee and lp fee and protocol fee and amount swapped in
-    swapped_amount_in = decoded_event.user_quote_amount_in;
-    swapped_amount_received = decoded_event.base_amount_out;
-    // into the pool is not added the protocol fee, or creator fee.
-    pool_token_b_vault_amount =
-      decoded_event.pool_quote_token_reserves + decoded_event.quote_amount_in_with_lp_fee;
-    pool_token_a_vault_amount = decoded_event.pool_base_token_reserves - swapped_amount_received;
-    let total_fee =
-      decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
-    // amount in is total user transfers in, don't include fee in denominator
+  }
+  // Buy instruction by pumpswap - check event length for backward compatibility
+  else {
+    let event_len = swap_event_instruction.data.len();
 
-    // Division by zero check for zero swapped amounts
-    fee_fraction_lp = if swapped_amount_in == 0 {
-      0
+    // New event format (416 bytes) - with min_base_amount_out and ix_name
+    if event_len == 416 {
+      let decoded_event =
+        PumpswapBuyEventIdlCurrent::try_from_slice(&swap_event_instruction.data).unwrap();
+      swapped_amount_in = decoded_event.user_quote_amount_in;
+      swapped_amount_received = decoded_event.base_amount_out;
+      pool_token_b_vault_amount =
+        decoded_event.pool_quote_token_reserves + decoded_event.quote_amount_in_with_lp_fee;
+      pool_token_a_vault_amount = decoded_event.pool_base_token_reserves - swapped_amount_received;
+      let total_fee =
+        decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
+      fee_fraction_lp = if swapped_amount_in == 0 {
+        0
+      } else {
+        (total_fee as u128 * LAMPORTS_PER_SOL / swapped_amount_in as u128) as u64
+      };
+    }
+    // Old event format (401 bytes) - backward compatible
+    else if event_len == 401 {
+      let decoded_event =
+        PumpswapBuyEventIdlOld::try_from_slice(&swap_event_instruction.data).unwrap();
+      swapped_amount_in = decoded_event.user_quote_amount_in;
+      swapped_amount_received = decoded_event.base_amount_out;
+      pool_token_b_vault_amount =
+        decoded_event.pool_quote_token_reserves + decoded_event.quote_amount_in_with_lp_fee;
+      pool_token_a_vault_amount = decoded_event.pool_base_token_reserves - swapped_amount_received;
+      let total_fee =
+        decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
+      fee_fraction_lp = if swapped_amount_in == 0 {
+        0
+      } else {
+        (total_fee as u128 * LAMPORTS_PER_SOL / swapped_amount_in as u128) as u64
+      };
     } else {
-        (total_fee as u128 * LAMPORTS_PER_SOL / (swapped_amount_in) as u128) as u64
-    };
+      panic!(
+        "Pumpswap: Found a buy event, but data length {} is not recognized (expected 401 or 416), tx signature: {}",
+        event_len, signature
+      );
+    }
   }
 
   let price_a_b_lp =
