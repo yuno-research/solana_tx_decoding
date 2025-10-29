@@ -1,3 +1,4 @@
 pub mod process_pumpfun_event_instruction;
 pub mod is_pumpfun_event_instruction;
 pub mod is_pf_bonding_curve_create_instruction;
+pub mod process_pf_bonding_curve_create_instruction;
