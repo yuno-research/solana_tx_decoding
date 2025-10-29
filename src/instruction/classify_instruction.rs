@@ -3,6 +3,7 @@ use crate::instruction::pumpswap::is_pumpswap_swap_instruction::is_pumpswap_swap
 use crate::instruction::raydium::is_raydium_ammv4_swap_instruction::is_raydium_ammv4_swap_instruction;
 use crate::instruction::raydium::is_raydium_cpmm_swap_instruction::is_raydium_cpmm_swap_instruction;
 use crate::instruction::raydium::is_raydium_launchpad_swap_instruction::is_raydium_launchpad_swap_instruction;
+use crate::instruction::pumpfun::is_pf_bonding_curve_create_instruction::is_pf_bonding_curve_create_instruction;
 use crate::types::instruction_type::InstructionType;
 use solana_central::types::instruction::Instruction;
 use solana_central::types::swap_direction::SwapDirection;
@@ -36,7 +37,11 @@ pub fn classify_instruction(instruction: &Instruction) -> (InstructionType, Swap
   // Dummy values
   else if is_pumpfun_event_instruction(instruction) {
     return (InstructionType::PfBondingCurveSwap, SwapDirection::AToB);
-  } else {
+  } 
+  else if is_pf_bonding_curve_create_instruction(instruction) {
+    return (InstructionType::PfBondingCurveCreate, SwapDirection::AToB);
+  }
+  else {
     return (InstructionType::None, SwapDirection::AToB);
   }
 }

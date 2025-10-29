@@ -28,7 +28,7 @@ pub enum InstructionType {
   // TODO add Jupiter Perps support
   // TODO add private AMMs support
 
-
+  PfBondingCurveCreate,
 
   // None of the above
   None,
