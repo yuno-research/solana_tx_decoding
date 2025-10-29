@@ -37,12 +37,17 @@ pub fn process_pumpfun_event_instruction(
   let virtual_token_reserves;
 
   /*
-  An example of a tx with a swap event of length 273. The structure for the data we need appears to
-  be identical, so we can just take the first 266 byes and put it into borsch. Example tx for which
-  we would do this for: 
-  2YSPuG5KmLsZmQAsnzgUo1185nvqR8fHUZtaUxZW5ug53717ajgHATggpUEN5UN9HpM4DCQYQKwAXEigUpAhDiqh
+  273: ix name (buy): 2YSPuG5KmLsZmQAsnzgUo1185nvqR8fHUZtaUxZW5ug53717ajgHATggpUEN5UN9HpM4DCQYQKwAXEigUpAhDiqh
+  274: ix name (sell): 4kDQCjvGqzMF53MnLaTwCyTN3Rc2E4vDSMYrvwj36XZq7nqETkPiEbiZzwwKbBYxJtyiVECwh3wQoqvPuPtUXhxp
+  286: ix name (buy_exact_sol_in): 55P61eQ7N8BGDNLP92H1evgk14uM5zw8FBb44StXwnYthspKzgRdCKXGXL2Mgsisu4SErXLQrS3PeLfppTF9sUAc
+
+  266 is the previous events used that didn't have the strings with ix name on it
   */
-  if instruction.data.len() == 266 || instruction.data.len() == 273{
+  if instruction.data.len() == 266
+    || instruction.data.len() == 273
+    || instruction.data.len() == 274
+    || instruction.data.len() == 286
+  {
     let decoded_layout = PfTradeEventIdlCurrent::try_from_slice(&instruction.data[..266]).unwrap();
     token_address = decoded_layout.mint;
     is_buy = decoded_layout.is_buy;
