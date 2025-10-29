@@ -1,10 +1,12 @@
 use crate::instruction::classify_instruction::classify_instruction;
+use crate::instruction::pumpfun::process_pf_bonding_curve_create_instruction::process_pf_bonding_curve_create_instruction;
+use crate::instruction::pumpfun::process_pumpfun_event_instruction::process_pumpfun_event_instruction;
 use crate::instruction::pumpswap::process_pumpswap_swap_instruction::process_pumpswap_swap_instruction;
 use crate::instruction::raydium::process_raydium_ammv4_swap_instruction::process_raydium_ammv4_swap_instruction;
 use crate::instruction::raydium::process_raydium_cpmm_swap_instruction::process_raydium_cpmm_swap_instruction;
 use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::process_raydium_launchpad_swap_instruction;
-use crate::instruction::pumpfun::process_pumpfun_event_instruction::process_pumpfun_event_instruction;
 use crate::types::instruction_type::InstructionType;
+use crate::types::token_creation::TokenCreation;
 use solana_central::constants::PUMP_CONSTANTS;
 use solana_central::types::instruction::Instruction;
 use solana_central::types::swap_tx::SwapTx;
@@ -20,6 +22,7 @@ pub fn inner_instructions_loop(
   ta_mint: &HashMap<u8, Pubkey>,
   running_token_balances: &mut HashMap<u8, u64>,
   swap_tx_sender: &Sender<SwapTx>,
+  token_create_sender: &Sender<TokenCreation>,
   block_time: u64,
   slot: u64,
   index: u64,
@@ -102,8 +105,7 @@ pub fn inner_instructions_loop(
           signature,
         );
       let _ = swap_tx_sender.send(swap_tx);
-    }
-    else if instruction_type == InstructionType::PfBondingCurveSwap {
+    } else if instruction_type == InstructionType::PfBondingCurveSwap {
       let swap_tx = process_pumpfun_event_instruction(
         instruction,
         block_time,
@@ -114,6 +116,16 @@ pub fn inner_instructions_loop(
         signature,
       );
       let _ = swap_tx_sender.send(swap_tx);
+    } else if instruction_type == InstructionType::PfBondingCurveCreate {
+      let creation = process_pf_bonding_curve_create_instruction(
+        instruction,
+        block_time,
+        slot,
+        index,
+        *atomic_instruction_index,
+        signature,
+      );
+      let _ = token_create_sender.send(creation);
     }
 
     *atomic_instruction_index += 1;

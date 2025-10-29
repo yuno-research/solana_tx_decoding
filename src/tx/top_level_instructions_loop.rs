@@ -1,10 +1,12 @@
 use crate::instruction::classify_instruction::classify_instruction;
+use crate::instruction::pumpfun::process_pf_bonding_curve_create_instruction::process_pf_bonding_curve_create_instruction;
 use crate::instruction::pumpswap::process_pumpswap_swap_instruction::process_pumpswap_swap_instruction;
 use crate::instruction::raydium::process_raydium_ammv4_swap_instruction::process_raydium_ammv4_swap_instruction;
 use crate::instruction::raydium::process_raydium_cpmm_swap_instruction::process_raydium_cpmm_swap_instruction;
 use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::process_raydium_launchpad_swap_instruction;
 use crate::tx::inner_instructions_loop::inner_instructions_loop;
 use crate::types::instruction_type::InstructionType;
+use crate::types::token_creation::TokenCreation;
 use solana_central::types::instruction::Instruction;
 use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
@@ -20,6 +22,7 @@ pub fn top_level_instructions_loop(
   ta_mint: &HashMap<u8, Pubkey>,
   running_token_balances: &mut HashMap<u8, u64>,
   swap_tx_sender: &Sender<SwapTx>,
+  token_create_sender: &Sender<TokenCreation>,
   block_time: u64,
   slot: u64,
   index: u64,
@@ -31,7 +34,8 @@ pub fn top_level_instructions_loop(
     let instr_index = instr_index as u8;
     let (instruction_type, swap_direction) = classify_instruction(&instruction);
     // println!("Instruction type: {:?}", instruction_type);
-    // println!("Atomic instruction index: {:?}", atomic_instruction_index); 
+    // println!("Instruction type: {:?}", instruction_type);
+    // println!("Atomic instruction index: {:?}", atomic_instruction_index);
     if instruction_type == InstructionType::None {
       // Bump by 1, if its not none it will be bumped by 1 again adn the length of the inners
       atomic_instruction_index += 1;
@@ -42,6 +46,7 @@ pub fn top_level_instructions_loop(
           ta_mint,
           running_token_balances,
           swap_tx_sender,
+          token_create_sender,
           block_time,
           slot,
           index,
@@ -111,6 +116,16 @@ pub fn top_level_instructions_loop(
         signature,
       );
       let _ = swap_tx_sender.send(swap_tx);
+    } else if instruction_type == InstructionType::PfBondingCurveCreate {
+      let creation = process_pf_bonding_curve_create_instruction(
+        instruction,
+        block_time,
+        slot,
+        index,
+        atomic_instruction_index,
+        signature,
+      );
+      let _ = token_create_sender.send(creation);
     }
     // Add to atomic instruction index if not None since the top level swaps don't iterate through
     if instruction_type != InstructionType::None {

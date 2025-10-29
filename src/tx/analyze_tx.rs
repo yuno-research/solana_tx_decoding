@@ -1,4 +1,5 @@
 use crate::tx::top_level_instructions_loop::top_level_instructions_loop;
+use crate::types::token_creation::TokenCreation;
 use crate::types::tx_format::TxFormat;
 use bumpalo::Bump;
 use solana_central::types::instruction::Instruction;
@@ -20,6 +21,7 @@ This function does not return anything, it writes to a broadcast channel
 pub fn analyze_tx(
   tx: &TxFormat,
   swap_tx_sender: &Sender<SwapTx>,
+  token_create_sender: &Sender<TokenCreation>,
   block_time: u64,
   slot: u64,
   index: u64,
@@ -76,7 +78,6 @@ pub fn analyze_tx(
           accounts: &raw_inst.accounts,
           data: &raw_inst.data,
           program_id_index: raw_inst.program_id_index,
-          atomic_instruction_index,
         };
         top_level_instructions.push(inst);
         atomic_instruction_index += 1;
@@ -89,7 +90,6 @@ pub fn analyze_tx(
             accounts: &inner_inst_raw.accounts,
             data: &inner_inst_raw.data,
             program_id_index: inner_inst_raw.program_id_index as u8,
-            atomic_instruction_index,
           };
           inner_instructions
             .entry(inner_inst_set.index as u8)
@@ -173,7 +173,6 @@ pub fn analyze_tx(
           accounts: &raw_inst.accounts,
           data: &raw_inst.data,
           program_id_index: raw_inst.program_id_index as u8,
-          atomic_instruction_index,
         };
         top_level_instructions.push(inst);
         atomic_instruction_index += 1;
@@ -186,7 +185,6 @@ pub fn analyze_tx(
             accounts: &inner_inst_raw.accounts,
             data: &inner_inst_raw.data,
             program_id_index: inner_inst_raw.program_id_index as u8,
-            atomic_instruction_index,
           };
           inner_instructions
             .entry(inner_inst_set.index as u8)
@@ -224,7 +222,7 @@ pub fn analyze_tx(
           .expect("analyze_tx: Signature should be 64 bytes"),
       );
     }
-    
+
     TxFormat::JsonRpc(tx) => {
       // Do not analyze failed txs
       if tx.meta.err.is_some() {
@@ -257,7 +255,6 @@ pub fn analyze_tx(
           accounts: &raw_inst.accounts,
           data: &raw_inst.data,
           program_id_index: raw_inst.program_id_index,
-          atomic_instruction_index,
         };
         top_level_instructions.push(inst);
         atomic_instruction_index += 1;
@@ -276,9 +273,8 @@ pub fn analyze_tx(
                 accounts: &inner_inst_raw.accounts,
                 data,
                 program_id_index: inner_inst_raw.program_id_index as u8,
-                atomic_instruction_index,
               };
-            },
+            }
             UiInstruction::Parsed(_) => {
               panic!("We should not be getting parsed instructions here");
             }
@@ -329,6 +325,7 @@ pub fn analyze_tx(
     &ta_mint,
     &mut running_token_balances,
     swap_tx_sender,
+    token_create_sender,
     block_time,
     slot,
     index,
