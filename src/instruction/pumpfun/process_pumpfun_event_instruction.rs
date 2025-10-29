@@ -36,10 +36,14 @@ pub fn process_pumpfun_event_instruction(
   let virtual_sol_reserves;
   let virtual_token_reserves;
 
-  // The new event post creator fee update
-  if instruction.data.len() == 266 {
-    let decoded_layout =
-      PfTradeEventIdlCurrent::try_from_slice(instruction.data).unwrap();
+  /*
+  An example of a tx with a swap event of length 273. The structure for the data we need appears to
+  be identical, so we can just take the first 266 byes and put it into borsch. Example tx for which
+  we would do this for: 
+  2YSPuG5KmLsZmQAsnzgUo1185nvqR8fHUZtaUxZW5ug53717ajgHATggpUEN5UN9HpM4DCQYQKwAXEigUpAhDiqh
+  */
+  if instruction.data.len() == 266 || instruction.data.len() == 273{
+    let decoded_layout = PfTradeEventIdlCurrent::try_from_slice(&instruction.data[..266]).unwrap();
     token_address = decoded_layout.mint;
     is_buy = decoded_layout.is_buy;
     sol_amount = decoded_layout.sol_amount;
