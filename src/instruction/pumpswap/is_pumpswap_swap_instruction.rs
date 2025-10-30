@@ -6,6 +6,7 @@ use solana_central::types::swap_direction::SwapDirection;
 This is to verify the swap instruction itself and not the swap event yielded by it
 */
 pub fn is_pumpswap_swap_instruction(instruction: &Instruction) -> (bool, SwapDirection) {
+  // Data length should be 24 for buy and sell, 25 for buy exact quote in
   if instruction.data.len() < 24 {
     return (false, SwapDirection::AToB);
   }
@@ -20,7 +21,11 @@ pub fn is_pumpswap_swap_instruction(instruction: &Instruction) -> (bool, SwapDir
     return (true, SwapDirection::BToA);
   } else if discriminator == PUMP_CONSTANTS.sell_instruction_discriminator {
     return (true, SwapDirection::AToB);
-  } else {
+  } 
+  else if discriminator == PUMP_CONSTANTS.pumpswap_buy_exact_quote_in_instruction_discriminator {
+    return (true, SwapDirection::BToA);
+  }
+  else {
     return (false, SwapDirection::AToB);
   }
 }

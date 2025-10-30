@@ -1,5 +1,5 @@
 use crate::protocol_idls::pumpswap::{
-  PumpswapBuyEventIdlCurrent, PumpswapBuyEventIdlOld, PumpswapSellEventIdl,
+  PumpswapBuyEventIdl, PumpswapSellEventIdl,
 };
 use borsh::BorshDeserialize;
 use solana_central::constants::LAMPORTS_PER_SOL;
@@ -35,6 +35,8 @@ pub fn process_pumpswap_swap_instruction(
   let pool_token_b_vault_amount;
   let fee_fraction_lp;
 
+  let event_len = swap_event_instruction.data.len();
+
   // Sell instruction by pumpswap
   if direction == SwapDirection::AToB {
     let decoded_event = PumpswapSellEventIdl::try_from_slice(&swap_event_instruction.data).unwrap();
@@ -61,13 +63,24 @@ pub fn process_pumpswap_swap_instruction(
   }
   // Buy instruction by pumpswap - check event length for backward compatibility
   else {
-    let event_len = swap_event_instruction.data.len();
 
-    // New event format (416 bytes) - with min_base_amount_out and ix_name
-    if event_len == 416 {
+    if 
+    // buy
+    event_len == 416 || 
+    // old without ix_name
+    event_len == 401 || 
+    // buy_exact_quote_in event length
+    event_len == 431 {
       let decoded_event =
-        PumpswapBuyEventIdlCurrent::try_from_slice(&swap_event_instruction.data).unwrap();
-      swapped_amount_in = decoded_event.user_quote_amount_in;
+        PumpswapBuyEventIdl::try_from_slice(&swap_event_instruction.data[..401]).unwrap();
+      if event_len == 431 {
+        // Buy exact quote in events have quote amount is as the total amount the user swaps in.
+        // Flipped around garbage protocol
+        swapped_amount_in = decoded_event.quote_amount_in;
+      }
+      else {
+        swapped_amount_in = decoded_event.user_quote_amount_in;
+      }
       swapped_amount_received = decoded_event.base_amount_out;
       pool_token_b_vault_amount =
         decoded_event.pool_quote_token_reserves + decoded_event.quote_amount_in_with_lp_fee;
@@ -80,23 +93,7 @@ pub fn process_pumpswap_swap_instruction(
         (total_fee as u128 * LAMPORTS_PER_SOL / swapped_amount_in as u128) as u64
       };
     }
-    // Old event format (401 bytes) - backward compatible
-    else if event_len == 401 {
-      let decoded_event =
-        PumpswapBuyEventIdlOld::try_from_slice(&swap_event_instruction.data).unwrap();
-      swapped_amount_in = decoded_event.user_quote_amount_in;
-      swapped_amount_received = decoded_event.base_amount_out;
-      pool_token_b_vault_amount =
-        decoded_event.pool_quote_token_reserves + decoded_event.quote_amount_in_with_lp_fee;
-      pool_token_a_vault_amount = decoded_event.pool_base_token_reserves - swapped_amount_received;
-      let total_fee =
-        decoded_event.lp_fee + decoded_event.protocol_fee + decoded_event.coin_creator_fee;
-      fee_fraction_lp = if swapped_amount_in == 0 {
-        0
-      } else {
-        (total_fee as u128 * LAMPORTS_PER_SOL / swapped_amount_in as u128) as u64
-      };
-    } else {
+    else {
       panic!(
         "Pumpswap: Found a buy event, but data length {} is not recognized (expected 401 or 416), tx signature: {}",
         event_len, signature
