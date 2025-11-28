@@ -1,5 +1,5 @@
 use crate::types::token_creation::TokenCreation;
-use solana_central::types::instruction::Instruction;
+use solana_central::Instruction;
 use solana_sdk::signature::Signature;
 
 pub fn process_pf_bonding_curve_create_instruction(

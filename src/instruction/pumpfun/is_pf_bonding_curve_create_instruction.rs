@@ -1,5 +1,5 @@
 use solana_central::constants::PUMP_CONSTANTS;
-use solana_central::types::instruction::Instruction;
+use solana_central::Instruction;
 
 /**
 Given a Solana instruction, determine if it is a PumpFun bonding curve create instruction.

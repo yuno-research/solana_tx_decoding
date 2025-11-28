@@ -1,8 +1,8 @@
+use solana_central::Instruction;
+use solana_central::Pools;
+use solana_central::SwapDirection;
+use solana_central::SwapTx;
 use solana_central::constants::LAMPORTS_PER_SOL;
-use solana_central::types::instruction::Instruction;
-use solana_central::types::pools::Pools;
-use solana_central::types::swap_direction::SwapDirection;
-use solana_central::types::swap_tx::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;

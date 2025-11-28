@@ -1,6 +1,6 @@
+use solana_central::Instruction;
+use solana_central::SwapDirection;
 use solana_central::constants::RAYDIUM_CONSTANTS;
-use solana_central::types::instruction::Instruction;
-use solana_central::types::swap_direction::SwapDirection;
 
 /**
 Determine whether or not a Solana instruction is a swap instruction of either a buy or sell on the
@@ -13,7 +13,9 @@ pub fn is_raydium_launchpad_swap_instruction(instruction: &Instruction) -> (bool
   if instruction.accounts.len() < 14 {
     return (false, SwapDirection::AToB);
   }
-  if instruction.tx_account_keys[instruction.program_id_index as usize] != RAYDIUM_CONSTANTS.launchpad_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize]
+    != RAYDIUM_CONSTANTS.launchpad_program
+  {
     return (false, SwapDirection::AToB);
   }
   // Discriminator has to match one of the launchpad swap discriminators

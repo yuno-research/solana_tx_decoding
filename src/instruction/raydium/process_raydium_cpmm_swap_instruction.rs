@@ -1,9 +1,9 @@
+use solana_central::Instruction;
+use solana_central::Pools;
+use solana_central::SwapDirection;
+use solana_central::SwapTx;
 use solana_central::constants::LAMPORTS_PER_SOL;
-use solana_central::raydium::get_cpmm_fee_amount_from_config_account::get_cpmm_fee_amount_from_config_account;
-use solana_central::types::instruction::Instruction;
-use solana_central::types::pools::Pools;
-use solana_central::types::swap_direction::SwapDirection;
-use solana_central::types::swap_tx::SwapTx;
+use solana_central::get_cpmm_fee_amount_from_config_account;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;
@@ -74,6 +74,7 @@ pub fn process_raydium_cpmm_swap_instruction(
 
   let fee_fraction_lp = get_cpmm_fee_amount_from_config_account(
     instruction.tx_account_keys[instruction.accounts[2] as usize],
+    &market_address,
   );
 
   let pool_token_a_vault_amount = running_token_balances[&token_a_vault_address];

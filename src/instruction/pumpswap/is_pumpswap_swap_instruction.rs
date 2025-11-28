@@ -1,6 +1,6 @@
+use solana_central::Instruction;
+use solana_central::SwapDirection;
 use solana_central::constants::PUMP_CONSTANTS;
-use solana_central::types::instruction::Instruction;
-use solana_central::types::swap_direction::SwapDirection;
 
 /**
 This is to verify the swap instruction itself and not the swap event yielded by it
@@ -21,11 +21,9 @@ pub fn is_pumpswap_swap_instruction(instruction: &Instruction) -> (bool, SwapDir
     return (true, SwapDirection::BToA);
   } else if discriminator == PUMP_CONSTANTS.sell_instruction_discriminator {
     return (true, SwapDirection::AToB);
-  } 
-  else if discriminator == PUMP_CONSTANTS.pumpswap_buy_exact_quote_in_instruction_discriminator {
+  } else if discriminator == PUMP_CONSTANTS.pumpswap_buy_exact_quote_in_instruction_discriminator {
     return (true, SwapDirection::BToA);
-  }
-  else {
+  } else {
     return (false, SwapDirection::AToB);
   }
 }

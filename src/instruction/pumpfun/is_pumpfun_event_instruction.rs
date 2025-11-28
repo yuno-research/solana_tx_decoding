@@ -1,5 +1,5 @@
 use solana_central::constants::PUMP_CONSTANTS;
-use solana_central::types::instruction::Instruction;
+use solana_central::Instruction;
 
 /**
 Given a solana instruction, check if it is a pumpfun event instruction.

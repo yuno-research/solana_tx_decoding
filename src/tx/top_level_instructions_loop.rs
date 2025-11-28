@@ -7,8 +7,8 @@ use crate::instruction::raydium::process_raydium_launchpad_swap_instruction::pro
 use crate::tx::inner_instructions_loop::inner_instructions_loop;
 use crate::types::instruction_type::InstructionType;
 use crate::types::token_creation::TokenCreation;
-use solana_central::types::instruction::Instruction;
-use solana_central::types::swap_tx::SwapTx;
+use solana_central::Instruction;
+use solana_central::SwapTx;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashMap;

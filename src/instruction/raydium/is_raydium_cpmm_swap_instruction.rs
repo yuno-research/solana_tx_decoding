@@ -1,5 +1,5 @@
+use solana_central::Instruction;
 use solana_central::constants::RAYDIUM_CONSTANTS;
-use solana_central::types::instruction::Instruction;
 
 /**
 Determine whether or not a Solana instruction is a swap instruction of either a buy or sell on the
@@ -12,7 +12,9 @@ pub fn is_raydium_cpmm_swap_instruction(instruction: &Instruction) -> bool {
   if instruction.accounts.len() < 13 {
     return false;
   }
-  if instruction.tx_account_keys[instruction.program_id_index as usize] != RAYDIUM_CONSTANTS.cpmm_program {
+  if instruction.tx_account_keys[instruction.program_id_index as usize]
+    != RAYDIUM_CONSTANTS.cpmm_program
+  {
     return false;
   }
   // Discriminator has to match one of the cpmm swap discriminators
