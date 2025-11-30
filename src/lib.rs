@@ -38,7 +38,6 @@ pub use instruction::pumpfun::is_pumpfun_event_instruction::is_pumpfun_event_ins
 pub use instruction::pumpfun::is_pf_bonding_curve_create_instruction::is_pf_bonding_curve_create_instruction;
 pub use types::tx_format::TxFormat;
 pub use types::instruction_type::InstructionType;
-pub use types::token_creation::TokenCreation;
 pub use types::archive_tx::ArchiveTx;
 pub use types::grpc_tx::GrpcTx;
 pub use types::json_rpc_tx::JsonRpcTx;
