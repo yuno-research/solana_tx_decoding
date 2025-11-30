@@ -9,13 +9,10 @@ use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashSet;
 
-/**
-Given the swap instruction and its corresponding event, process swap instruction if it is relevant
-signer, update market state, etc.
-
-The reason why both the instruction and the event are needed is because the platform config cannot
-be derived from only the data given in the event.
-*/
+/// Process a Raydium launchpad swap instruction and create a SwapTx. Assumes the instruction has
+/// been validated as a valid Raydium launchpad swap. Requires both the swap instruction and its
+/// corresponding event instruction because the platform config cannot be derived from the event
+/// data alone.
 pub fn process_raydium_launchpad_swap_instruction(
   instruction: &Instruction,
   event: &Instruction,

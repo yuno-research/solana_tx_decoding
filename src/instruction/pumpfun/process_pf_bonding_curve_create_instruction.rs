@@ -2,6 +2,9 @@ use crate::types::token_creation::TokenCreation;
 use solana_central::Instruction;
 use solana_sdk::signature::Signature;
 
+/// Process a Pumpfun bonding curve creation instruction and create a TokenCreation. Extracts token
+/// creation information from the bonding curve create instruction data, including name, symbol,
+/// URI, and metadata fields.
 pub fn process_pf_bonding_curve_create_instruction(
   instruction: &Instruction,
   block_time: u64,

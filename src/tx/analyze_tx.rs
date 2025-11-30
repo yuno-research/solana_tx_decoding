@@ -11,13 +11,12 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use tokio::sync::broadcast::Sender;
 
-/**
-This is going to be the main function that analyzes raw solana transactions and extracts what we
-need from them. For now its just swap txs and bubblemapping but we will extract more later on like
-adding/removing liquidity and etc.
-
-This function does not return anything, it writes to a broadcast channel
-*/
+/// Analyze raw Solana transactions and extract swaps and token creations. This is the main entry
+/// point for transaction decoding. It accepts transactions from multiple sources (Archive, gRPC,
+/// JSON RPC) using the `TxFormat` enum and normalizes them into a common format before processing,
+/// writing stadardized output to channels `swap_tx_sender` and `token_create_sender`. Failed
+/// transactions are skipped and not analyzed. TODO support can be added for add/remove liquidity
+/// and bubblemapping with links.
 pub fn analyze_tx(
   tx: &TxFormat,
   swap_tx_sender: &Sender<SwapTx>,

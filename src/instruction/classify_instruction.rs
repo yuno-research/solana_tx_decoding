@@ -8,15 +8,9 @@ use crate::types::instruction_type::InstructionType;
 use solana_central::Instruction;
 use solana_central::SwapDirection;
 
-/**
-Instruction classifier and because some classification functions also yield other info like swap
-direction this returns a tuple. A dummy value will be used for those functions that don't return
-the info like SwapDirection but InstructionType will always be correct or null.
-
-The functions that return SwapDirection are:
-- is pumpswap swap instruction
-- is raydium launchpad swap instruction
-*/
+/// Classify an instruction to determine its type and swap direction. Returns a tuple of 
+/// `(InstructionType, SwapDirection)`. For instructions that don't have a swap direction, a dummy
+/// `SwapDirection` value is used. The `InstructionType` will always be correct or `None`.
 pub fn classify_instruction(instruction: &Instruction) -> (InstructionType, SwapDirection) {
   if is_raydium_ammv4_swap_instruction(instruction) {
     return (InstructionType::RaydiumAmmV4Swap, SwapDirection::AToB);

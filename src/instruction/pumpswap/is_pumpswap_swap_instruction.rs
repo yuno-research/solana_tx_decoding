@@ -2,9 +2,8 @@ use solana_central::Instruction;
 use solana_central::SwapDirection;
 use solana_central::constants::PUMP_CONSTANTS;
 
-/**
-This is to verify the swap instruction itself and not the swap event yielded by it
-*/
+/// Determine if a Solana instruction is a Pumpswap swap instruction. Checks program ID, data
+/// length, and identifies swap direction by checking instruction discriminator.
 pub fn is_pumpswap_swap_instruction(instruction: &Instruction) -> (bool, SwapDirection) {
   // Data length should be 24 for buy and sell, 25 for buy exact quote in
   if instruction.data.len() < 24 {

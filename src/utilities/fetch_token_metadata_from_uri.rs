@@ -1,12 +1,9 @@
 use reqwest::Client;
 use serde_json::Value;
 
-/**
-Not all token metadata is stored on the blockchain. The blockchain stores a URI which is a link to
-an API that returns a json object of additonal metadata. From this object, we look to extract the
-description, twitter, and website, if these fields exist. If they do not, then we can return empty
-strings for them.
-*/
+/// Fetch additional token metadata from off-chain URI. Token metadata URIs point to JSON APIs that
+/// return additional metadata. This function extracts description, twitter, and website fields
+/// from the JSON response, returning empty strings if fields are missing or not strings.
 pub async fn fetch_token_metadata_from_uri(
   client: &Client,
   uri: &str,

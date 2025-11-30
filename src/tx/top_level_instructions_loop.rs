@@ -15,6 +15,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use tokio::sync::broadcast::Sender;
 
+/// Process top-level instructions in a transaction. Iterates through top-level instructions,
+/// classifies them, and processes swap/creation instructions. Also calls `inner_instructions_loop`
+/// to process the inner instructions that belong to each top level instruction.
 pub fn top_level_instructions_loop(
   top_level_instructions: &Vec<Instruction>,
   inner_instructions: &HashMap<u8, Vec<Instruction>>,

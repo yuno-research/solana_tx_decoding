@@ -16,6 +16,9 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use tokio::sync::broadcast::Sender;
 
+/// Handles inner instructions that result from program invocations. Processes swap instructions
+/// and token creation events from various protocols, sending results to broadcast channels just
+/// like `top_level_instructions_loop` does.
 pub fn inner_instructions_loop(
   inner_instructions: &Vec<Instruction>,
   account_keys: &Vec<Pubkey>,

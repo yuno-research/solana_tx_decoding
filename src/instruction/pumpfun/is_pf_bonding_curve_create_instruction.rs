@@ -1,9 +1,9 @@
 use solana_central::constants::PUMP_CONSTANTS;
 use solana_central::Instruction;
 
-/**
-Given a Solana instruction, determine if it is a PumpFun bonding curve create instruction.
-*/
+/// Determine if a Solana instruction is a Pumpfun bonding curve creation instruction. Checks data
+/// length, account count, discriminator, and program ID to identify Pumpfun bonding curve creation
+/// instructions.
 pub fn is_pf_bonding_curve_create_instruction(instruction: &Instruction) -> bool {
   /*
   Data can be of any unbounded size due to string in it, but the minimum size will be 40 since it

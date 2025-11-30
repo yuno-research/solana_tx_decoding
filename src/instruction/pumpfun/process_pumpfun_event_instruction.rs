@@ -12,10 +12,9 @@ use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashSet;
 
-/**
-PF bonding curve events contain all you need to build the SwapTx type. This function assumed that
-the instruction has already been validated as a valid pumpfun event instruction.
-*/
+/// Process a Pumpfun bonding curve event instruction and create a SwapTx. Pumpfun bonding curve
+/// events contain all information needed to build the SwapTx type. Assumes the instruction has
+/// already been validated as a valid Pumpfun event instruction.
 pub fn process_pumpfun_event_instruction(
   instruction: &Instruction,
   block_time: u64,

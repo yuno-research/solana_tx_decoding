@@ -2,10 +2,9 @@ use solana_central::Instruction;
 use solana_central::SwapDirection;
 use solana_central::constants::RAYDIUM_CONSTANTS;
 
-/**
-Determine whether or not a Solana instruction is a swap instruction of either a buy or sell on the
-Raydium Launchpad protocol.
-*/
+/// Determine if a Solana instruction is a Raydium launchpad swap instruction. Checks program ID,
+/// data length, account count, and instruction discriminator to identify Raydium launchpad swap
+/// instructions. Returns the swap direction identified by the discriminator.
 pub fn is_raydium_launchpad_swap_instruction(instruction: &Instruction) -> (bool, SwapDirection) {
   if instruction.data.len() < 32 {
     return (false, SwapDirection::AToB);

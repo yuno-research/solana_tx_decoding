@@ -1,9 +1,9 @@
 use solana_central::constants::PUMP_CONSTANTS;
 use solana_central::Instruction;
 
-/**
-Given a solana instruction, check if it is a pumpfun event instruction.
-*/
+/// Determine if a Solana instruction is a Pumpfun bonding curve event instruction. Checks data
+/// length, discriminator, program ID, and event authority account to identify Pumpfun event
+/// instructions that contain swap data.
 pub fn is_pumpfun_event_instruction(instruction: &Instruction) -> bool {
   // Smallest data length is 137, we'll give a bit tolerance
   if instruction.data.len() < 100 {

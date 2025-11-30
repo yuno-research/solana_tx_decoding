@@ -8,9 +8,9 @@ use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-/**
-Assumes that the instruction is a valid raydium ammv4 swap instruction.
-*/
+/// Process a Raydium AMMv4 swap instruction and create a SwapTx. Assumes the instruction has been
+/// validated as a valid Raydium AMMv4 swap. Uses token transfer instructions that follow the swap
+/// to determine swap amounts.
 pub fn process_raydium_ammv4_swap_instruction(
   // The swap instruction itself
   instruction: &Instruction,

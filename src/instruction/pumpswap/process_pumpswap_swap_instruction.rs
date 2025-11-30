@@ -11,9 +11,9 @@ use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use std::collections::HashSet;
 
-/**
-Given a solana instruction, check if it is a pumpswap swap event and then process it accordingly.
-*/
+/// Process a Pumpswap swap instruction and create a SwapTx. Assumes the instruction has been
+/// validated as a valid Pumpswap swap. Needs the event instruction that follows the swap
+/// instruction to extract swap details.
 pub fn process_pumpswap_swap_instruction(
   instruction: &Instruction,
   swap_event_instruction: &Instruction,

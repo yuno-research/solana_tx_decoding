@@ -1,10 +1,9 @@
 use solana_central::Instruction;
 use solana_central::constants::RAYDIUM_CONSTANTS;
 
-/**
-Determine whether or not a Solana instruction is a swap instruction of either a buy or sell on the
-Raydium CPMM protocol.
-*/
+/// Determine if a Solana instruction is a Raydium Cpmm/AmmV5 swap instruction. Checks program ID,
+/// data length, account count, and instruction discriminator to identify Raydium CPMM swap
+/// instructions.
 pub fn is_raydium_cpmm_swap_instruction(instruction: &Instruction) -> bool {
   if instruction.data.len() < 24 {
     return false;

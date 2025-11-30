@@ -1,3 +1,6 @@
+/// Enumeration of all supported instruction types. Represents the different types of instructions
+/// that can be classified and processed. Includes swaps from various protocols, token creations,
+/// and liquidity operations.
 #[repr(u8)]
 #[derive(Eq, PartialEq, Debug)]
 pub enum InstructionType {

@@ -1,6 +1,9 @@
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 
+/// Standardized token creation event structure. Contains information about newly created
+/// tokens/pools extracted from transaction data. Used for tracking new token launches (e.g.,
+/// Pumpfun bonding curve creation).
 #[derive(Debug, Clone)]
 pub struct TokenCreation {
   pub address: Pubkey,

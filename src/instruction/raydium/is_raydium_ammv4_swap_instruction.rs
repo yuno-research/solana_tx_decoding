@@ -1,10 +1,9 @@
 use solana_central::Instruction;
 use solana_central::constants::RAYDIUM_CONSTANTS;
 
-/**
-Determine whether or not a Solana instruction is a swap instruction of either a buy or sell on the
-Raydium AmmV4 protocol.
-*/
+/// Determine if a Solana instruction is a Raydium AMMv4 swap instruction. Checks program ID, data
+/// length, account count, and instruction discriminator to identify Raydium AMMv4 swap
+/// instructions.
 pub fn is_raydium_ammv4_swap_instruction(instruction: &Instruction) -> bool {
   if instruction.data.len() < 17 {
     return false;

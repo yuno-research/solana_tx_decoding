@@ -9,12 +9,9 @@ use solana_sdk::signature::Signature;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-/**
-This function is called in a scenario where the signer of a tx is a relevant signer has produced a
-raydium cpmm swap instruction. No checks are done here, ingestion tx loop does the checks and then
-calls this function when it detects a cpmm swap instruction on a relevant signer. This function is
-not used for market updates. All it does is broadcast the swap tx for relevant signers.
-*/
+/// Process a Raydium Cpmm swap instruction and create a SwapTx. Assumes the instruction has been
+/// validated as a valid Raydium Cpmm swap. Uses token transfer instructions that follow the swap
+/// to determine swap amounts.
 pub fn process_raydium_cpmm_swap_instruction(
   // The swap instruction itself
   instruction: &Instruction,
