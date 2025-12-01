@@ -2,6 +2,8 @@
 
 Library for decoding raw Solana transactions from various sources into standardized formats.
 
+Rust components are extensively documented in the following rustdoc: [https://yuno-research.github.io/docs/target/doc/solana_tx_decoding/index.html](https://yuno-research.github.io/docs/target/doc/solana_tx_decoding/index.html)
+
 ## Overview
 
 This library processes raw transaction data from multiple sources (Archive blocks, gRPC streams, JSON RPC) and converts them into standardized types (`SwapTx`, `TokenCreation`) that can be easily used across systems. The decoding works in both live and historical settings, producing consistent output regardless of the transaction source.
